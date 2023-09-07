@@ -1,0 +1,11 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+
+metadata:
+  name: skip-crds-plugin-role
+  namespace: argo-cd
+
+rules:
+  - apiGroups: [""]
+    resources: [""]
+    verbs: ["get", "list", "watch"]

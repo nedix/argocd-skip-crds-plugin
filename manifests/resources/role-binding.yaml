@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+
+metadata:
+  name: skip-crds-plugin-role-binding
+  namespace: argo-cd
+
+subjects:
+  - kind: ServiceAccount
+    name: skip-crds-plugin-service-account
+    namespace: argo-cd
+
+roleRef:
+  kind: Role
+  name: skip-crds-plugin-role
+  apiGroup: rbac.authorization.k8s.io

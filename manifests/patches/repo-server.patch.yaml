@@ -1,0 +1,51 @@
+- op: add
+  path: /spec/template/spec/serviceAccountName
+  value: skip-crds-plugin-service-account
+- op: add
+  path: /spec/template/spec/containers/-
+  value:
+    name: skip-crds-plugin
+    image: ghcr.io/nedix/argocd-skip-crds-plugin:0.1.0
+    command:
+      - /var/run/argocd/argocd-cmp-server
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 999
+    volumeMounts:
+      - name: skip-crds-plugin
+        mountPath: /home/argocd/cmp-server/config/plugin.yaml
+        subPath: skip-crds-plugin.yaml
+      - name: skip-crds-plugin-temp
+        mountPath: /tmp
+      - name: skip-crds-plugin-token
+        mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        readOnly: true
+      - name: plugins
+        mountPath: /home/argocd/cmp-server/plugins
+      - name: var-files
+        mountPath: /var/run/argocd
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: skip-crds-plugin
+    configMap:
+      name: skip-crds-plugin-config
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: skip-crds-plugin-temp
+    emptyDir: {}
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: skip-crds-plugin-token
+    projected:
+      sources:
+        - configMap:
+            name: kube-root-ca.crt
+            items:
+              - key: ca.crt
+                path: ca.crt
+        - serviceAccountToken:
+            expirationSeconds: 3600
+            path: token

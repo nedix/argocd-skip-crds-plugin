@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+set -e
+
+
+set -e
+
+if [[ ! $(kubectl get --raw="/readyz?verbose") ]]; then
+    kubectl config set-credentials default-user --token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+    kubectl config set-cluster default-cluster --server="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}" --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    kubectl config set-context default-context --cluster=default-cluster --user=default-user
+    kubectl config use-context default-context
+fi
+
+RESOURCES=$(< /dev/stdin)
+
+if [[ -z "$RESOURCES" ]]; then
+    echo "$RESOURCES"
+    exit 0
+fi
+
+API_RESOURCES=$(kubectl api-resources --verbs=list -o wide | awk ' \
+    NR==1 {api_col=index($0, "APIVERSION"); kind_col=index($0, "KIND")} \
+    NR>1 {print substr($0, api_col, index(substr($0, api_col), " ")), substr($0, kind_col, index(substr($0, kind_col), " "))} \
+')
+
+INCLUDE_FILTERS=$(echo "$API_RESOURCES" | awk '{split($1, parts, "/"); print "-i g=" parts[1] ",v=" parts[2] ",k=" $2}')
+EXCLUDE_FILTERS=$(echo "$API_RESOURCES" | awk '{split($1, parts, "/"); print "-x g=" parts[1] ",v=" parts[2] ",k=" $2}')
+
+RESOURCES_FILTERED=$(echo "$RESOURCES" | kfilt $INCLUDE_FILTERS)
+RESOURCES_REJECTED=$(echo "$RESOURCES" | kfilt $EXCLUDE_FILTERS)
+
+if [[ -z "$RESOURCES_REJECTED" ]]; then
+    echo "$RESOURCES_FILTERED"
+    exit 0
+fi
+
+ANNOTATIONS=(
+    "argocd.argoproj.io/sync-options=SkipDryRunOnMissingResource=true"
+    "argocd.argoproj.io/compare-options=IgnoreExtraneous"
+    "argocd.argoproj.io/sync-wave-"
+)
+
+ANNOTATION_ARGS="--local=true --dry-run=client --overwrite -f /dev/stdin -o yaml"
+
+RESOURCES_PATCHED="$RESOURCES_REJECTED"
+
+for ANNOTATION in "${ANNOTATIONS[@]}"; do
+    RESOURCES_PATCHED="$(echo "$RESOURCES_PATCHED" | kubectl annotate $ANNOTATION_ARGS "$ANNOTATION")"
+done
+
+echo -e "${RESOURCES_FILTERED}\n---\n${RESOURCES_PATCHED}\n---\n"
