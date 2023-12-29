@@ -2,9 +2,6 @@
 
 set -e
 
-
-set -e
-
 if [[ ! $(kubectl get --raw="/readyz?verbose") ]]; then
     kubectl config set-credentials default-user --token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
     kubectl config set-cluster default-cluster --server="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}" --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
