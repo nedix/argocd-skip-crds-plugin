@@ -1,6 +1,9 @@
-FROM --platform=$BUILDPLATFORM ghcr.io/nedix/kubernetes-tools-docker:1.0.3 as tools
+ARG ALPINE_VERSION=3.18
+ARG KUBERNETES_TOOLS_VERSION=1.0.3
 
-FROM --platform=$BUILDPLATFORM alpine:3.18
+FROM --platform=$BUILDPLATFORM ghcr.io/nedix/kubernetes-tools-docker:${KUBERNETES_TOOLS_VERSION} as tools
+
+FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION}
 
 COPY --link --from=tools /usr/local/bin/helm /usr/bin/helm
 COPY --link --from=tools /usr/local/bin/kfilt /usr/bin/kfilt
