@@ -5,7 +5,7 @@
   path: /spec/template/spec/containers/-
   value:
     name: skip-crds-plugin
-    image: ghcr.io/nedix/argocd-skip-crds-plugin:0.1.0
+    image: ghcr.io/nedix/argocd-skip-crds-plugin:v0.15.0
     command:
       - /var/run/argocd/argocd-cmp-server
     securityContext:
