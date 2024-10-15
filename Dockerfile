@@ -1,5 +1,5 @@
 ARG ALPINE_VERSION=3.20
-ARG TOOLS_VERSION=v0.75.0
+ARG TOOLS_VERSION=v0.76.1
 
 FROM --platform=$BUILDPLATFORM ghcr.io/nedix/kubernetes-tools-container:${TOOLS_VERSION} as tools
 
