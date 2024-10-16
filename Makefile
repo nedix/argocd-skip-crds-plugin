@@ -1,6 +1,6 @@
 setup:
-	@docker build . -t skip-crds-plugin
+	@docker build --progress=plain -f Containerfile -t argocd-skip-crds-plugin .
 
 run:
 	@docker run --rm -it --entrypoint /bin/sh \
-		skip-crds-plugin
+		argocd-skip-crds-plugin
