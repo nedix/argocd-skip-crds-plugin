@@ -1,7 +1,7 @@
 ARG ALPINE_VERSION=3.23
-ARG TOOLS_VERSION=v0.78.53
+ARG TOOLS_VERSION=0.78.53
 
-FROM --platform=$BUILDPLATFORM nedix/kubernetes-tools:${TOOLS_VERSION} as tools
+FROM --platform=$BUILDPLATFORM nedix/kubernetes-tools:v${TOOLS_VERSION} as tools
 
 FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION}
 

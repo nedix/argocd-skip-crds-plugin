@@ -11,11 +11,18 @@
       packageNameTemplate: "alpine",
     },
     {
-      depNameTemplate: "Tools",
+      depNameTemplate: "Kubernetes Tools",
       fileMatch: ["^Containerfile$"],
       matchStrings: ["ARG TOOLS_VERSION=(?<currentValue>.*?)\\n"],
       datasourceTemplate: "github-tags",
       packageNameTemplate: "nedix/kubernetes-tools-container",
+    },
+  ],
+  packageRules: [
+    {
+      description: "Custom versioning for Kubernetes Tools",
+      matchPackageNames: ["nedix/kubernetes-tools-container"],
+      extractVersion: "^v(?<version>.*)$",
     },
   ],
 }
